@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Solar Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-solar-panel"></i> Smart Solar Dashboard</h1>
+            <div class="nav-buttons">
+                <button id="ordersBtn" class="nav-btn active">Orders</button>
+                <button id="bookingsBtn" class="nav-btn">Bookings</button>
+                <button id="productsBtn" class="nav-btn">Products</button>
+            </div>
+        </header>
+
+        <main>
+            <div id="content-area">
+                <!-- The content will be dynamically loaded here -->
+                <div id="orders-container" class="content-container active">
+                    <h2>Orders</h2>
+                    <div class="data-container">
+                        <div id="orders-list" class="data-list"></div>
+                        <div class="pagination" id="orders-pagination"></div>
+                    </div>
+                </div>
+
+                <div id="bookings-container" class="content-container">
+                    <h2>Bookings</h2>
+                    <div class="data-container">
+                        <div id="bookings-list" class="data-list"></div>
+                        <div class="pagination" id="bookings-pagination"></div>
+                    </div>
+                </div>
+
+                <div id="products-container" class="content-container">
+                    <h2>Products</h2>
+                    <button id="add-product-btn" class="action-btn"><i class="fas fa-plus"></i> Add Product</button>
+                    <div class="data-container">
+                        <div id="products-list" class="data-list"></div>
+                        <div class="pagination" id="products-pagination"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="add-product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Product</h2>
+            <form id="add-product-form">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" id="category" name="category" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price (RS)</label>
+                    <input type="number" id="price" name="price" required>
+                </div>
+                <div class="form-group">
+                    <label for="about">About</label>
+                    <textarea id="about" name="about" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="specification">Specification</label>
+                    <textarea id="specification" name="specification" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="guide">Guide</label>
+                    <textarea id="guide" name="guide" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="image">Image URL</label>
+                  <input type="text" id="image" name="image" value="assets/default.png">
+              </div>
+                <button type="submit" class="action-btn">Add Product</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
