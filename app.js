@@ -29,6 +29,25 @@ const tabCallbacks = {
 
 // Authentication
 async function checkAuthentication() {
+    // Check if we have a stored user first
+    const storedUser = JSON.parse(localStorage.getItem('smartSolarUser'));
+    
+    if (storedUser) {
+        // Show dashboard right away
+        loginContainer.style.display = 'none';
+        dashboardContainer.style.display = 'block';
+        
+        // Display the user email
+        userEmail.textContent = storedUser.email;
+        
+        // Check if there's a saved tab in localStorage
+        const savedTab = localStorage.getItem('smartSolarActiveTab') || 'users';
+        
+        // Switch to the saved tab
+        switchTab(savedTab, tabCallbacks);
+    }
+    
+    // Verify with Firebase (this will handle cases where the token is expired)
     const isAuthenticated = await checkAuth();
     
     if (isAuthenticated) {
@@ -42,10 +61,14 @@ async function checkAuthentication() {
             userEmail.textContent = user.email;
         }
         
-        // Initialize dashboard
-        fetchOrders();
+        // Check if there's a saved tab in localStorage
+        const savedTab = localStorage.getItem('smartSolarActiveTab') || 'users';
+        
+        // Switch to the saved tab
+        switchTab(savedTab, tabCallbacks);
     } else {
-        // Show login and hide dashboard
+        // No valid authentication, show login
+        localStorage.removeItem('smartSolarUser'); // Clear any invalid stored user
         loginContainer.style.display = 'flex';
         dashboardContainer.style.display = 'none';
     }

@@ -13,6 +13,9 @@ function switchTab(tabName, callbacks) {
     });
     document.getElementById(`${tabName}-container`).classList.add('active');
 
+    // Save the current tab to localStorage
+    localStorage.setItem('smartSolarActiveTab', tabName);
+
     // Call appropriate data loading function
     if (callbacks && callbacks[tabName]) {
         const contentList = document.getElementById(`${tabName}-list`);

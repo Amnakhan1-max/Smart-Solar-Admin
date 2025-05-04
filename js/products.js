@@ -22,6 +22,10 @@ function initProductsModule() {
     document.querySelector('.close').addEventListener('click', closeAddProductModal);
     addProductForm.addEventListener('submit', handleAddProduct);
     
+    // Dynamic fields event listeners
+    document.getElementById('add-specification-btn').addEventListener('click', () => addNewField('specification'));
+    document.getElementById('add-guide-btn').addEventListener('click', () => addNewField('guide'));
+    
     // Close modal when clicking outside
     window.addEventListener('click', (event) => {
         if (event.target === addProductModal) {
@@ -68,26 +72,39 @@ function displayProducts(page) {
         const productCard = document.createElement('div');
         productCard.className = 'data-card product-card';
         
-        // Create a concise product description (limit length)
-        const shortDescription = product.description && product.description.length > 100 ? 
-            product.description.substring(0, 100) + '...' : 
-            (product.description || 'No description available');
+        let specificationHTML = 'N/A';
+        if (Array.isArray(product.specification) && product.specification.length > 0) {
+            specificationHTML = '<ul>' + 
+                product.specification.map(spec => `<li>${spec}</li>`).join('') + 
+                '</ul>';
+        } else if (product.specification) {
+            specificationHTML = product.specification;
+        }
+        
+        let guideHTML = 'N/A';
+        if (Array.isArray(product.guide) && product.guide.length > 0) {
+            guideHTML = '<ul>' + 
+                product.guide.map(item => `<li>${item}</li>`).join('') + 
+                '</ul>';
+        } else if (product.guide) {
+            guideHTML = product.guide;
+        }
         
         productCard.innerHTML = `
             <div class="product-header">
                 <h3>${product.title || 'Unnamed Product'}</h3>
-                <span class="product-price">${product.price || 'Price N/A'}</span>
+                <span class="product-price">Rs ${product.price || 'Price N/A'}</span>
             </div>
             <div class="product-main">
                 <p><span class="label">Category:</span> ${product.category || 'N/A'}</p>
                 <p><span class="label">About:</span> ${product.about || 'N/A'}</p>
-                <p><span class="label">Description:</span> ${shortDescription}</p>
+                <p><span class="label">Description:</span> ${product.description || 'No description available'}</p>
             </div>
             <details>
                 <summary>Specifications and Guide</summary>
                 <div class="product-details">
-                    <p><span class="label">Specification:</span> ${product.specification || 'N/A'}</p>
-                    <p><span class="label">Guide:</span> ${product.guide || 'N/A'}</p>
+                    <p><span class="label">Specification:</span> ${specificationHTML}</p>
+                    <p><span class="label">Guide:</span> ${guideHTML}</p>
                 </div>
             </details>
             <div class="product-actions">
@@ -116,11 +133,101 @@ function displayProducts(page) {
 function openAddProductModal() {
     openModal('add-product-modal');
     addProductForm.reset();
+    
+    // Reset dynamic fields
+    resetDynamicFields('specification');
+    resetDynamicFields('guide');
 }
 
 // Close add product modal
 function closeAddProductModal() {
     closeModal('add-product-modal');
+}
+
+// Function to reset dynamic fields to a single empty input
+function resetDynamicFields(fieldType) {
+    const container = document.getElementById(`${fieldType}-container`);
+    
+    if (fieldType === 'guide') {
+        container.innerHTML = `
+            <div class="dynamic-field-row">
+                <input type="text" class="${fieldType}-field" placeholder="Enter step 1">
+                <button type="button" class="remove-field-btn" style="display: none;"><i class="fas fa-minus"></i></button>
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            <div class="dynamic-field-row">
+                <input type="text" class="${fieldType}-field" placeholder="Enter ${fieldType}">
+                <button type="button" class="remove-field-btn" style="display: none;"><i class="fas fa-minus"></i></button>
+            </div>
+        `;
+    }
+}
+
+// Function to add a new input field
+function addNewField(fieldType) {
+    const container = document.getElementById(`${fieldType}-container`);
+    const newField = document.createElement('div');
+    newField.className = 'dynamic-field-row';
+    
+    if (fieldType === 'guide') {
+        const stepNumber = container.querySelectorAll('.dynamic-field-row').length + 1;
+        newField.innerHTML = `
+            <input type="text" class="${fieldType}-field" placeholder="Enter step ${stepNumber}">
+            <button type="button" class="remove-field-btn"><i class="fas fa-minus"></i></button>
+        `;
+    } else {
+        newField.innerHTML = `
+            <input type="text" class="${fieldType}-field" placeholder="Enter ${fieldType}">
+            <button type="button" class="remove-field-btn"><i class="fas fa-minus"></i></button>
+        `;
+    }
+    
+    container.appendChild(newField);
+    
+    // Show remove button on all fields if there's more than one field
+    if (container.querySelectorAll('.dynamic-field-row').length > 1) {
+        container.querySelectorAll('.remove-field-btn').forEach(btn => {
+            btn.style.display = 'block';
+        });
+    }
+    
+    // Add event listeners to all remove buttons
+    setupRemoveButtonListeners(container, fieldType);
+}
+
+// Setup event listeners for all remove buttons in a container
+function setupRemoveButtonListeners(container, fieldType) {
+    container.querySelectorAll('.remove-field-btn').forEach(btn => {
+        // Remove old event listeners to prevent duplicates
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        // Add new event listener
+        newBtn.addEventListener('click', function() {
+            const fieldRow = this.closest('.dynamic-field-row');
+            container.removeChild(fieldRow);
+            
+            // If only one field remains, hide its remove button
+            if (container.querySelectorAll('.dynamic-field-row').length === 1) {
+                container.querySelector('.remove-field-btn').style.display = 'none';
+            }
+            
+            // Update placeholders for guide fields to maintain sequential step numbers
+            if (fieldType === 'guide') {
+                updateGuidePlaceholders(container);
+            }
+        });
+    });
+}
+
+// Update placeholders for guide fields to show sequential step numbers
+function updateGuidePlaceholders(container) {
+    const guideFields = container.querySelectorAll('.guide-field');
+    guideFields.forEach((field, index) => {
+        field.placeholder = `Enter step ${index + 1}`;
+    });
 }
 
 // Upload image to Firebase Storage
@@ -151,31 +258,49 @@ async function handleAddProduct(e) {
     try {
         const title = document.getElementById('title').value;
         const category = document.getElementById('category').value;
-        const priceValue = document.getElementById('price').value;
+        const priceValue = parseFloat(document.getElementById('price').value) || 0;
         const about = document.getElementById('about').value;
         const description = document.getElementById('description').value;
-        const specification = document.getElementById('specification').value;
-        const guide = document.getElementById('guide').value;
         const imageUrl = document.getElementById('image').value;
+        
+        // Get specification values as array
+        const specificationFields = document.querySelectorAll('.specification-field');
+        const specificationValues = [];
+        specificationFields.forEach(field => {
+            if (field.value.trim() !== '') {
+                specificationValues.push(field.value.trim());
+            }
+        });
+        
+        // Get guide values as array
+        const guideFields = document.querySelectorAll('.guide-field');
+        const guideValues = [];
+        guideFields.forEach(field => {
+            if (field.value.trim() !== '') {
+                guideValues.push(field.value.trim());
+            }
+        });
         
         const newProduct = {
             title: title,
             title_lowercase: title.toLowerCase(),
             category: category,
-            price: `RS ${priceValue}`,
+            price: priceValue,
             about: about,
             description: description,
-            specification: specification,
-            guide: guide,
+            specification: specificationValues,
+            guide: guideValues,
             image: imageUrl
         };
         
         const productsCollection = collection(db, "products");
         await addDoc(productsCollection, newProduct);
         
-        // Refresh products list
+        // Close modal first
         closeAddProductModal();
-        fetchProducts();
+        
+        // Then refresh products list to show the newly added product
+        await fetchProducts();
         
         // Show success message
         alert('Product added successfully!');

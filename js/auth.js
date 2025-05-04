@@ -8,14 +8,29 @@ const ADMIN_ROLE = 'admin';
 // Check if user is authenticated and is an admin
 function checkAuth() {
     return new Promise((resolve) => {
+        // First, check if we have user data in localStorage
+        const storedUser = JSON.parse(localStorage.getItem('smartSolarUser'));
+        
+        if (storedUser) {
+            return;
+        }
+        
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in, check if admin
                 isAdmin(user).then(isAdminUser => {
+                    if (isAdminUser) {
+                        // Store minimal user info in localStorage
+                        localStorage.setItem('smartSolarUser', JSON.stringify({
+                            uid: user.uid,
+                            email: user.email
+                        }));
+                    }
                     resolve(isAdminUser);
                 });
             } else {
-                // User is signed out
+                // User is signed out, clear localStorage
+                localStorage.removeItem('smartSolarUser');
                 resolve(false);
             }
         });
@@ -38,6 +53,12 @@ async function login(email, password) {
                 error: 'Access denied. Only administrators can access this panel.' 
             };
         }
+        
+        // Store minimal user info in localStorage
+        localStorage.setItem('smartSolarUser', JSON.stringify({
+            uid: userCredential.user.uid,
+            email: userCredential.user.email
+        }));
         
         return { success: true, user: userCredential.user };
     } catch (error) {
@@ -66,6 +87,8 @@ async function login(email, password) {
 // Logout
 async function logout() {
     try {
+        // Remove user data from localStorage
+        localStorage.removeItem('smartSolarUser');
         await signOut(auth);
         return true;
     } catch (error) {
@@ -103,7 +126,15 @@ async function isAdmin(user) {
 
 // Get currently logged in user
 function getCurrentUser() {
-    return auth.currentUser;
+    // First check Firebase auth
+    const firebaseUser = auth.currentUser;
+    if (firebaseUser) {
+        return firebaseUser;
+    }
+    
+    // If no Firebase user, check localStorage
+    const storedUser = JSON.parse(localStorage.getItem('smartSolarUser'));
+    return storedUser || null;
 }
 
 export { checkAuth, login, logout, isAdmin, getCurrentUser };

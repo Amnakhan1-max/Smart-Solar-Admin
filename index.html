@@ -39,16 +39,16 @@
                 Welcome, <span id="user-email"></span> 
             </div>
             <div class="nav-buttons">
-                <button id="usersBtn" class="nav-btn">Users</button>
+                <button id="usersBtn" class="nav-btn active">Users</button>
                 <button id="productsBtn" class="nav-btn">Products</button>
-                <button id="ordersBtn" class="nav-btn active">Orders</button>
+                <button id="ordersBtn" class="nav-btn">Orders</button>
                 <button id="bookingsBtn" class="nav-btn">Bookings</button>
             </div>
         </header>
 
         <main>
             <div id="content-area">
-                <div id="orders-container" class="content-container active">
+                <div id="orders-container" class="content-container">
                     <h2>Orders</h2>
                     <div class="data-container">
                         <div id="orders-list" class="data-list"></div>
@@ -73,7 +73,7 @@
                     </div>
                 </div>
 
-                <div id="users-container" class="content-container">
+                <div id="users-container" class="content-container active">
                     <h2>Users</h2>
                     <div class="data-container">
                         <div id="users-list" class="data-list"></div>
@@ -112,7 +112,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="price">Price (RS)</label>
+                            <label for="price">Price (Rs)</label>
                             <input type="number" id="price" name="price" required>
                         </div>
                     </div>
@@ -129,11 +129,23 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="specification">Specification</label>
-                            <textarea id="specification" name="specification" rows="3" required></textarea>
+                            <div id="specification-container" class="dynamic-fields-container">
+                                <div class="dynamic-field-row">
+                                    <input type="text" class="specification-field" placeholder="Enter specification">
+                                    <button type="button" class="remove-field-btn" style="display: none;"><i class="fas fa-minus"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" id="add-specification-btn" class="add-field-btn"><i class="fas fa-plus"></i>&nbsp; Add Spec</button>
                         </div>
                         <div class="form-group">
                             <label for="guide">Guide</label>
-                            <textarea id="guide" name="guide" rows="3" required></textarea>
+                            <div id="guide-container" class="dynamic-fields-container">
+                                <div class="dynamic-field-row">
+                                    <input type="text" class="guide-field" placeholder="Add step 1">
+                                    <button type="button" class="remove-field-btn" style="display: none;"><i class="fas fa-minus"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" id="add-guide-btn" class="add-field-btn"><i class="fas fa-plus"></i>&nbsp; Add Step</button>
                         </div>
                     </div>
                     <button type="submit" class="action-btn">Add Product</button>

@@ -243,6 +243,14 @@ h2 {
     margin-bottom: 15px;
 }
 
+.product-details {
+    margin-top: 6px;
+}
+
+.product-details ul {
+    margin-left: 20px;
+}
+
 .product-price {
     font-weight: bold;
     color: var(--primary-color);
@@ -616,4 +624,58 @@ button[type="submit"]:disabled {
     h1 {
         margin-bottom: 10px;
     }
+}
+
+/* Dynamic fields container styles */
+.dynamic-fields-container {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+.dynamic-field-row {
+    display: flex;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.dynamic-field-row:last-child {
+    margin-bottom: 0;
+}
+
+.dynamic-field-row input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.add-field-btn, .remove-field-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.remove-field-btn {
+    background-color: #f44336;
+    padding: 4px 8px;
+}
+
+.add-field-btn:hover {
+    background-color: #45a049;
+}
+
+.remove-field-btn:hover {
+    background-color: #d32f2f;
 }
