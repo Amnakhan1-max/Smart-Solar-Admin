@@ -1,4 +1,4 @@
-import { db, collection, getDocs, doc, getDoc } from './firebase-config.js';
+import { db, collection, getDocs, doc, getDoc, deleteDoc } from './firebase-config.js';
 import { ITEMS_PER_PAGE, createPagination, updatePaginationButtons } from './pagination.js';
 
 // State for orders
@@ -42,6 +42,13 @@ async function fetchOrders() {
         snapshot.forEach(doc => {
             allOrders.push({ id: doc.id, ...doc.data() });
         });
+
+        // Sort orders by createdAt descending (latest first)
+        allOrders.sort((a, b) => {
+            const aTime = a.createdAt?.seconds || 0;
+            const bTime = b.createdAt?.seconds || 0;
+            return bTime - aTime;
+        });
         
         totalPages = Math.ceil(allOrders.length / ITEMS_PER_PAGE);
         displayOrders(1);
@@ -68,7 +75,10 @@ async function displayOrders(page) {
     
     // Process each order and add to DOM
     for (const order of ordersToDisplay) {
-        const orderDate = order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+        // Merge date and time into one string
+        const orderedAt = order.createdAt
+            ? new Date(order.createdAt.seconds * 1000).toLocaleString()
+            : 'N/A';
         
         // Fetch user information if userId exists
         let userData = null;
@@ -96,10 +106,13 @@ async function displayOrders(page) {
         orderCard.innerHTML = `
             <div class="order-header">
                 <h3>Order #${order.id.substring(0, 6).toUpperCase()}</h3>
-                <span class="status ${order.status || 'pending'}">${order.status || 'Pending'}</span>
+                <div>
+                    <span class="status ${order.status || 'pending'}">${order.status || 'Pending'}</span>
+                    <button class="delete-btn del-top" data-id="${order.id}">Delete</button>
+                </div>
             </div>
             <div class="order-details">
-                <p><span class="label">Date:</span> ${orderDate}</p>
+                <p><span class="label">Ordered At:</span> ${orderedAt}</p>
                 <p><span class="label">Total:</span> RS ${order.totalAmount}</p>
                 <p><span class="label">Payment:</span> ${order.paymentMethod}</p>
                 <p><span class="label">Ship To:</span> ${order.address}, ${order.city}</p>
@@ -121,9 +134,36 @@ async function displayOrders(page) {
         
         ordersList.appendChild(orderCard);
     }
-    
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const orderId = e.target.getAttribute('data-id');
+            if (orderId) {
+                deleteOrder(orderId);
+            }
+        });
+    });
+
     currentPage = page;
     updatePaginationButtons('orders', currentPage);
+}
+
+// Delete order
+async function deleteOrder(orderId) {
+    if (!confirm('Are you sure you want to delete this order?')) {
+        return;
+    }
+    try {
+        const orderRef = doc(db, "orders", orderId);
+        await deleteDoc(orderRef);
+        // Refresh orders list
+        fetchOrders();
+        alert('Order deleted successfully!');
+    } catch (error) {
+        console.error("Error deleting order: ", error);
+        alert('Failed to delete order. Please try again.');
+    }
 }
 
 export { fetchOrders, displayOrders };
